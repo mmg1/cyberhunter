@@ -1,0 +1,99 @@
+# Author: Diego Perez (@darkquasar)
+# License: GPL-3.0
+# MAYA Version: 0.0.1
+# Description: Dockerfile Cyberhunter Jupyter Data Analysis
+
+FROM darkquasar/cyberhunter-base-jre-11:1.0
+
+# *** Set Shell ***
+SHELL ["/bin/bash", "-c"]
+
+# *** Setting up Envs ***
+# Generic ENV
+ENV CYBERHUNTER_DIR /opt/cyberhunter/
+ENV CYBERHUNTER_SCRIPTS /opt/cyberhunter/scripts
+
+# User ENV
+ENV JUPYTERUSER "cyberhunter"
+ENV JUPYTER_GROUP "jupyterhub"
+ENV JUPYTERUSER_TEMP_HUB_PASS "pass"
+ENV JUPYTERUSER_HOME /home/$JUPYTERUSER
+
+# Conda & Jupyter ENV
+ENV ANACONDA_DIR /opt/cyberhunter/conda3
+ENV JUPYTER_DIR /opt/cyberhunter/jupyter
+ENV JUPYTER_NOTEBOOKS_DIR /opt/cyberhunter/jupyter/notebooks
+ENV PATH $ANACONDA_DIR/bin:$PATH
+
+# Apache Spark ENV
+ENV JUPYTER_SPARK_DIR /opt/cyberhunter/jupyter/spark
+
+# ES HADOOP ENV
+ENV JUPYTER_ESHADOOP_DIR /opt/cyberhunter/jupyter/es-hadoop
+ENV ESHADOOP_VERSION 6.6.1
+
+RUN groupadd -g 750 $JUPYTER_GROUP \
+    ## && randompw=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 20 | head -n 1) \ # not needed, can login as root to container
+    && useradd -m -s /bin/bash -u 750 -g $JUPYTER_GROUP $JUPYTERUSER \
+    && echo $JUPYTERUSER:$JUPYTERUSER_TEMP_HUB_PASS | chpasswd -c SHA512 \
+    && usermod -aG shadow $JUPYTERUSER \
+    && echo "[CYBERHUNTER-JUPYTERENV] User $JUPYTERUSER created with Password $randompw" \
+    && mkdir -pv $CYBERHUNTER_DIR \
+    && mkdir -pv $CYBERHUNTER_SCRIPTS \
+    && mkdir -pv $JUPYTER_DIR \
+    && mkdir -pv $JUPYTER_NOTEBOOKS_DIR \
+    && mkdir -pv $CYBERHUNTER_DIR \
+    && mkdir -pv $JUPYTER_SPARK_DIR \
+    && mkdir -pv $JUPYTER_ESHADOOP_DIR \
+    && chown -R $JUPYTERUSER:JUPYTER_GROUP $CYBERHUNTER_DIR \
+    && chmod -R g+w $JUPYTER_NOTEBOOKS_DIR \
+    && apt-get update -qq \
+    && apt-get install -qqy --no-install-recommends \
+    # 1. Installing APT packages
+    wget \
+    git \
+    && apt-get -qy clean autoremove \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=$JUPYTERUSER:$JUPYTER_GROUP jupyterhub-config/jupyterhub_config.py $JUPYTERUSER_HOME
+COPY jupyterhub-config/sudoers_jupyter /etc/sudoers.d
+
+# 2. Now let's install Miniconda and required Packages
+# Ref: https://jcrist.github.io/conda-docker-tips.html
+USER $JUPYTERUSER
+WORKDIR /home/$JUPYTERUSER
+RUN export PATH=$PATH:$ANACONDA_DIR/bin/ \
+    && mkdir -pv $JUPYTERUSER_HOME/.conda \
+    && wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda_installer.sh \
+    && /bin/bash ~/miniconda_installer.sh -b -p $ANACONDA_DIR \
+    && rm ~/miniconda_installer.sh \
+	&& . $ANACONDA_DIR/etc/profile.d/conda.sh \
+	&& conda activate base \
+    && conda init \
+    && conda config --system --prepend channels conda-forge \
+	&& conda config --system --set channel_priority strict \
+    && conda install --quiet --yes \
+        'conda-build' \
+		'jupyterhub' \
+        'jupyterlab' \
+		'kafka-python' \
+		'nbconvert' \
+		'notebook' \
+		'pika' \
+        'pyspark' \
+        'sudospawner' \
+    # 2.1 - Let's add packages not available in conda-forge
+    && python3 -m pip install ksql \
+    && python3 -m pip install jupyterhub-nativeauthenticator \
+    # 2.3 - Running some cleanup commands
+    && conda clean -afy \
+    && conda build purge-all \
+    && npm cache clean --force \
+	&& find $ANACONDA_DIR -follow -type f -name '*.a' -delete \
+    && find $ANACONDA_DIR -follow -type f -name '*.pyc' -delete \
+    && find $ANACONDA_DIR -follow -type f -name '*.js.map' -delete \
+    && find $ANACONDA_DIR/lib/python*/site-packages/bokeh/server/static -follow -type f -name '*.js' ! -name '*.min.js' -delete \
+    && rm -rf /home/$JUPYTERUSER/.cache/yarn
+
+EXPOSE 8888 8000
+
