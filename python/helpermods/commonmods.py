@@ -38,10 +38,10 @@ class common:
   
     # Initializing variables
     logger.info('Initializing {}'.format(__name__))
-    config_file_path = Path.cwd() / "CYBERHUNTER.yml"
+    config_file_path = Path.cwd() / "cyberhunt-config.yml"
     self.CYBERHUNTER_config = self.load_CYBERHUNTER_config(config_file_path)
 
-  def get_tools(self):
+  def get_cyberhunt_tools(self):
 
     CYBERHUNTER_base_dir = Path.cwd()
 
@@ -138,7 +138,7 @@ class common:
 
   def extract_key_dict(self, key, dictionary):
       # This helper function iterates over the "n" depth structure of a dict 
-      # in search for a the Key specified in the "key" parameter, then
+      # in search for a Key specified in the "key" parameter, then
       # returns all values associated with that Key.
 
       if hasattr(dictionary, 'items'):
@@ -175,21 +175,21 @@ class common:
     return bin_path
 
   def load_cyberhunter_config(self, config_path):
-    # This function will load CYBERHUNTER.yml
+    # This function will load cyberhunt-config.yml
     logger.info('Loading CYBERHUNTER Config at {}'.format(config_path))
 
     with open(config_path, 'r') as conf:
       try:
-          return yaml.load(conf)
+        return yaml.load(conf)
       except yaml.YAMLError as e:
-          print(e)
+        print(e)
 
   def unzip(self, src, dst, extract_all=False, name_filter=None, type_filter=None):
     # Helper function to unzip files. It accepts two filters:
     # 1. name_filter: it will only extract a file matching this name pattern
     # 2. type_filter: it will only extract a file that matches a particular type (like PE)
 
-    # TODO: improve this function by collecting all file names in the beginning
+    # TODO: improve this function by collecting all file names at the beginning
     # so as to not have to iterate over each file for a simple string match
     
     # Open the ZIP file

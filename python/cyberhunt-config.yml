@@ -1,10 +1,10 @@
 ---
-# ***** Config options for Maya parsermods *****
+# ***** Config options for Cyberhunter *****
 
-# NOTE: All paths are relative to the streamhunter base dir
+# NOTE: All paths are relative to the Cyberhunter base dir.
 # If a tool has a 'SourceUrl' key of 'None' it means it doesn't need to be downloaded.
 # This applies to situations where one ZIP file contains many tools inside. Extracted tools
-# only need to be referenced so that the 'BinaryName' and 'BinaryMD5' is known to MAYA.
+# only need to be referenced so that the 'BinaryName' and 'BinaryMD5' is known to Cyberhunter.
 
 # TODO: add CI/CD integration so that MD5 for tools in here are automatically updated on a nightly basis.
 

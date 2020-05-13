@@ -25,39 +25,14 @@ from datetime import datetime as datetime
 from pathlib import Path
 from time import strftime
 
-# Setup logging
-logger = logging.getLogger('CYBERHUNTER')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(formatter)
-console_handler.setLevel(logging.DEBUG)
-logger.addHandler(console_handler)
-logger.setLevel(logging.DEBUG)
-
-
-'''
-# can't use until I fix kafka logging verbosity
-try:
-    import coloredlogs
-    coloredlogs.install(fmt='%(asctime)s - %(name)s - %(message)s', level="DEBUG")
-    
-except ModuleNotFoundError:
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(logging.DEBUG)
-        logger.addHandler(console_handler)
-        logger.setLevel(logging.INFO)
-'''
-
 class Arguments(object):
     
   def __init__(self, args):
+
     self.parser = argparse.ArgumentParser(
-        description="XML to JSON Document Converter"
+        description="CYBERHUNTER DFIR Framework"
         )
     
-
     self.parser.add_argument(
         "-a", "--action",
         help="This option determines what action will be executed by CYBERHUNTER: parse logs, collect logs, hunt (runs a particular data anlysis mod) or learn (ML)",
@@ -92,7 +67,7 @@ class Arguments(object):
         
     self.parser.add_argument(
         "-l", "--logtype",
-        help="This option specifies the type of log being ingested. Type xml requires a file in XML format with proper wrapping (opening and closing top-level root node). Type csv requires a csv file in ASCII format.",
+        help="This option specifies the type of log being ingested. Type ""xml"" requires a file in XML format with proper wrapping (opening and closing top-level root node). Type csv requires a ""csv"" file in ASCII format.",
         type=str,
         choices=["xml", "csv"],
         default="xml",
@@ -112,7 +87,7 @@ class Arguments(object):
         "-o", "--output",
         help="Type of output: stdout-csv, stdout-json, kafka, rabbitmq, elasticsearch",
         type=str,
-        choices=["stdout-csv", "stdout-json", "rabbitmq", "kafka"],
+        choices=["stdout-csv", "stdout-json", "rabbitmq", "kafka", "elasticsearch"],
         default="stdout-json",
         required=False
         )
@@ -175,6 +150,23 @@ def list_targetfiles(pargs):
 def main():
   args = Arguments(sys.argv)
   pargs = args.get_args()
+
+  # Setup logging
+  # We need to pass the "logger" to any Classes or Modules that may use it 
+  # in our script
+  try:
+    import coloredlogs
+    logger = logging.getLogger('CYBERHUNTER')
+    coloredlogs.install(fmt='%(asctime)s - %(name)s - %(message)s', level="DEBUG", logger=logger)
+    
+  except ModuleNotFoundError:
+    logger = logging.getLogger('CYBERHUNTER')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.DEBUG)
+    logger.addHandler(console_handler)
+    logger.setLevel(logging.INFO)
   
   # Capturing start time for debugging purposes
   st = datetime.now()
