@@ -1,14 +1,16 @@
 # Author: Diego Perez (@darkquasar)
 # License: GPL-3.0
-# CYBERHUNTER Version: 0.0.1
+# CYBERHUNTER Version: 0.5.1
 # Description: Dockerfile Cyberhunter Jupyterhub and Jupyterlab for Data Analysis
 
 FROM darkquasar/cyberhunter-base-jre-11:1.0
 
+LABEL maintainer="Diego Perez <@darkquasar>" cyberhunter_version="0.5.1"
+
 # *** Set Shell ***
 SHELL ["/bin/bash", "-c"]
 
-# *** Setting up Envs ***
+# *** Setting up Env Variables ***
 # Generic ENV
 ENV CYBERHUNTER_DIR /opt/cyberhunter/
 ENV CYBERHUNTER_SCRIPTS /opt/cyberhunter/scripts
@@ -128,4 +130,5 @@ RUN export PATH=$PATH:$ANACONDA_DIR/bin/ \
 
 EXPOSE 8888 8000
 
+# Start JupyterHub
 CMD [ "jupyterhub" ]

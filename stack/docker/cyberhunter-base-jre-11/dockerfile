@@ -1,12 +1,11 @@
 # Author: Diego Perez (@darkquasar)
 # License: GPL-3.0
-# MAYA Version: 0.0.1
+# CYBERHUNTER Version: 0.5.1
 # Description: Dockerfile Cyberhunter Base Image
 # Reference: jre11 adapted from https://github.com/docker-library/openjdk/tree/86918ee28d383e7af63f535a2558040dce141099/11/jre
 
 FROM phusion/baseimage:latest-amd64
-LABEL maintainer="Diego Perez (@darkquasar)"
-LABEL description="Dockerfile CYBERHUNTER Base Image"
+LABEL maintainer="Diego Perez (@darkquasar)" description="Dockerfile CYBERHUNTER Base Image"
 
 ENV DEBIAN_FRONTEND noninteractive
 
