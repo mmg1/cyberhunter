@@ -30,7 +30,7 @@ ENV HADOOP_USER cyberhadoop
 
 # Spark/Hadoop Versions
 ENV SPARK_VERSION 2.4.5
-ENV HADOOP_VERSION 2.7
+ENV HADOOP_VERSION 2.7.3
 
 # Apache Hadoop Vars
 ENV HADOOP_HOME /opt/hadoop
@@ -39,7 +39,7 @@ ENV PATH $PATH:$HADOOP_HOME/bin
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$HADOOP_HOME/lib/native
 
 # Apache Spark Vars
-ENV SPARK_PACKAGE spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
+ENV SPARK_PACKAGE spark-${SPARK_VERSION}-bin-hadoop2.7
 ENV SPARK_HOME /opt/spark
 ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
 ENV PATH $PATH:${SPARK_HOME}/bin
@@ -77,6 +77,11 @@ RUN useradd -ms /bin/bash $SPARK_USER \
     #&& cd $SPARK_HOME \
     #&& ln -s $SPARK_PACKAGE spark \
     #&& chown -R $SPARK_USER:$SPARK_USER $SPARK_HOME
+
+# Spark Environment Config
+ENV SPARK_HOME=/opt/spark
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip \
+    PATH=$PATH:$SPARK_HOME/bin
 
 WORKDIR $SPARK_HOME
 
